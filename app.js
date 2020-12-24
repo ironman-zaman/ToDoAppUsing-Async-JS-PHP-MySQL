@@ -9,24 +9,19 @@ class Book{
 //UI Class: Handle UI Tasks
 class UI{
     static displayBooks(){
-        const StoreBooks = [
-            {
-                title : 'Book One',
-                author : 'Arbin',
-                isbn : '3434343'
-            },
-            {
-                title : 'Book Tow',
-                author : 'Aktar',
-                isbn : '5434343'
+        var xhr = new XMLHttpRequest();
+            xhr.open('GET','book-list.php',true);
+            xhr.onload = function(){
+                if(this.status==200){
+                    const StoreBooks = JSON.parse(this.responseText);
+                    const books = StoreBooks;
+                    books.forEach(function(book){
+                        UI.addBookToList(book);
+                    });
+                }
             }
-        ];
-
-        const books = StoreBooks;
-        books.forEach(function(book){
-            UI.addBookToList(book);
-        });
-    }
+            xhr.send();
+        }
 
     static addBookToList(book){
         const list = document.querySelector('#book-list');
@@ -38,6 +33,7 @@ class UI{
         <td><a  class="btn btn-danger btn-sm delete">X</a></td>
         ` ;
         list.appendChild(row);
+
     }
 
     static deleteBook(el){
@@ -57,6 +53,25 @@ class UI{
 }
 
 //Store Class : Handles Storage
+class BookStorage{
+    static storeBooks(book){
+        //Store date to database using a post HTTP request to php file
+        var params = "title=" + book.title +
+                    "&author=" + book.author + 
+                    "&isbn=" + book.isbn;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'process.php', true);
+        xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+        xhr.onload = function(){
+            if(this.status == 200){
+                console.log(this.responseText);
+                UI.addBookToList(book);
+            }
+        }
+
+        xhr.send(params);
+    }
+}
 
 //Event : Display a book
 document.addEventListener('DOMContentLoaded', UI.displayBooks);
@@ -73,8 +88,9 @@ const isbn = document.querySelector('#isbn').value;
 //Instantiate book
 const book = new Book(title,author,isbn);
 //Add book to UI
-UI.addBookToList(book);
-UI.clearFields();
+//UI.addBookToList(book);
+//UI.clearFields();
+BookStorage.storeBooks(book);
 });
 
 //Event : Remove  a book
