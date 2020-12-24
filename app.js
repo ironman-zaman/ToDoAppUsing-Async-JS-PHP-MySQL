@@ -9,6 +9,8 @@ class Book{
 //UI Class: Handle UI Tasks
 class UI{
     static displayBooks(){
+        const list = document.querySelector('#book-list');
+        list.innerHTML = "";
         var xhr = new XMLHttpRequest();
             xhr.open('GET','book-list.php',true);
             xhr.onload = function(){
@@ -30,16 +32,16 @@ class UI{
         <td>${book.title}</td>
         <td>${book.author}</td>
         <td>${book.isbn}</td>
-        <td><a  class="btn btn-danger btn-sm delete">X</a></td>
+        <td><a data-id="${book.id}" class="btn btn-danger btn-sm delete">X</a></td>
         ` ;
         list.appendChild(row);
-
     }
 
     static deleteBook(el){
-        console.log('clicked');
         if(el.classList.contains('delete')){
             el.parentElement.parentElement.remove();
+            var bookId = el.getAttribute("data-id");
+            BookStorage.delete(bookId);
         }
     }
 
@@ -65,17 +67,29 @@ class BookStorage{
         xhr.onload = function(){
             if(this.status == 200){
                 console.log(this.responseText);
-                UI.addBookToList(book);
+                UI.displayBooks(book);
             }
         }
 
         xhr.send(params);
     }
+
+    static delete(bookId){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'delete.php?id='+bookId, true);
+        xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+        xhr.onload = function(){
+            if(this.status == 200){
+                console.log(this.responseText);
+            }
+        }
+
+        xhr.send();
+    }
 }
 
 //Event : Display a book
 document.addEventListener('DOMContentLoaded', UI.displayBooks);
-
 //Event : Add a book
 document.querySelector('#book-form').addEventListener('submit', function(e){
 //Prevent default action of submit

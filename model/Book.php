@@ -7,6 +7,7 @@ class Book{
     public $title;
     public $author;
     public $isbn;
+    public $id;
 
     public function __construct($dbConn)
     {
@@ -51,6 +52,20 @@ class Book{
     public function read(){
     //Create the query
     $query = 'SELECT * FROM '.$this->table;
+
+    //prepare statements
+    $stmt = $this->conn->prepare($query);
+    //Execute
+    if($stmt->execute()){
+        return $stmt;
+    }
+    //Print error if something goes wrong
+    printf("Error %s.'\n",$stmt->error);
+    }
+
+    public function delete(){
+    //Create the query
+    $query = 'DELETE  FROM '.$this->table.' WHERE id= '.$this->id;
 
     //prepare statements
     $stmt = $this->conn->prepare($query);
